@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, Calendar, Users, Flag, Landmark } from 'lucide-react';
+import { getGeminiResponse } from './gemini';
 
 const QA_DATABASE = {
   "how to register": "You can register to vote in India by filling out Form 6 online on the Voter Portal (voters.eci.gov.in) or offline. To be eligible, you must be an Indian citizen, at least 18 years old on the qualifying date, and a resident of the polling area.",
@@ -112,7 +113,7 @@ function App() {
     setInputText('');
 
     // Simulate bot thinking
-    setTimeout(() => {
+    setTimeout(async () => {
       let botResponse = "I'm not completely sure about that. Try asking about 'how to register', 'what is Lok Sabha', or 'types of elections'.";
       
       const lowerInput = userMessage.toLowerCase();
@@ -132,6 +133,12 @@ function App() {
         botResponse = QA_DATABASE['who can vote'];
       } else if (lowerInput.includes('types') || lowerInput.includes('what kinds') || lowerInput.includes('how many elections')) {
         botResponse = QA_DATABASE['types of elections'];
+      } else {
+        // Fallback to Gemini AI if API key is configured
+        if (import.meta.env.VITE_GEMINI_API_KEY) {
+          const aiResponse = await getGeminiResponse(userMessage);
+          if (aiResponse) botResponse = aiResponse;
+        }
       }
 
       setMessages(prev => [
@@ -149,7 +156,7 @@ function App() {
   ];
 
   return (
-    <div className="container" style={{ maxWidth: '800px' }}>
+    <main className="container" style={{ maxWidth: '800px' }}>
       <header style={{ textAlign: 'center', paddingTop: '2rem', paddingBottom: '1rem' }}>
         <h1 style={{ fontSize: '3rem', background: 'linear-gradient(to right, #2563eb, #7c3aed)', WebkitBackgroundClip: 'text', color: 'transparent', marginBottom: '0.5rem', fontWeight: '700' }}>
           Indian Election Assistant
@@ -160,6 +167,7 @@ function App() {
         <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--card-bg)', border: '1px solid var(--card-border)', padding: '0.5rem', borderRadius: '30px', boxShadow: '0 10px 20px rgba(0,0,0,0.05)' }}>
           <input 
             type="text" 
+            aria-label="Ask a question about the Indian election process"
             placeholder="Ask a question about the Indian election process..." 
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
@@ -167,6 +175,7 @@ function App() {
             style={{ flex: 1, border: 'none', background: 'transparent', padding: '0.5rem 1rem', fontSize: '1.05rem', outline: 'none', color: 'var(--text-main)' }}
           />
           <button 
+            aria-label="Send message"
             onClick={() => handleSend()}
             disabled={!inputText.trim()}
             style={{ background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '24px', padding: '0.5rem 1.5rem', cursor: 'pointer', fontSize: '1rem', fontWeight: '500', transition: 'all 0.2s' }}
@@ -179,6 +188,7 @@ function App() {
           {quickReplies.map((reply, index) => (
             <button 
               key={index} 
+              aria-label={`Ask: ${reply}`}
               className="quick-reply-btn"
               onClick={() => handleSend(reply)}
             >
@@ -215,12 +225,16 @@ function App() {
 
       <div style={{ textAlign: 'center', marginBottom: '3rem', display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
         <button 
+          aria-expanded={showTimeline}
+          aria-label="Toggle timeline view"
           onClick={() => { setShowTimeline(!showTimeline); setShowGuide(false); }}
           style={{ background: showTimeline ? 'var(--primary)' : 'transparent', border: '2px solid var(--primary)', color: showTimeline ? 'white' : 'var(--primary)', padding: '0.75rem 2.5rem', borderRadius: '30px', cursor: 'pointer', fontWeight: '600', fontSize: '1rem', transition: 'all 0.2s' }}
         >
           {showTimeline ? 'Hide Timeline' : 'View Timeline'}
         </button>
         <button 
+          aria-expanded={showGuide}
+          aria-label="Toggle registration guide view"
           onClick={() => { setShowGuide(!showGuide); setShowTimeline(false); }}
           style={{ background: showGuide ? 'var(--primary)' : 'transparent', border: '2px solid var(--primary)', color: showGuide ? 'white' : 'var(--primary)', padding: '0.75rem 2.5rem', borderRadius: '30px', cursor: 'pointer', fontWeight: '600', fontSize: '1rem', transition: 'all 0.2s' }}
         >
@@ -294,7 +308,7 @@ function App() {
           </div>
         </section>
       )}
-    </div>
+    </main>
   );
 }
 
