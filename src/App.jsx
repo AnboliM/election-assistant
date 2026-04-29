@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, Calendar, Users, Flag, Landmark } from 'lucide-react';
+import { Send, Bot, Calendar, Users, Flag, Landmark, Search } from 'lucide-react';
 import { getGeminiResponse } from './gemini';
 
 const QA_DATABASE = {
@@ -178,9 +178,9 @@ function App() {
             aria-label="Send message"
             onClick={() => handleSend()}
             disabled={!inputText.trim()}
-            style={{ background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '24px', padding: '0.5rem 1.5rem', cursor: 'pointer', fontSize: '1rem', fontWeight: '500', transition: 'all 0.2s' }}
+            style={{ background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '50%', padding: '0.6rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', width: '45px', height: '45px' }}
           >
-            Search
+            <Search size={20} />
           </button>
         </div>
         
